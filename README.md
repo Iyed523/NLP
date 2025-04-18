@@ -25,3 +25,20 @@ Avant de cloner ce dépôt, assure-vous d'avoir installé **Git LFS** et d'avoir
 
    ```bash
    git lfs install
+
+
+Pour tester ce projet en local, suivez les étapes ci-dessous :
+Accéder au dossier src : Une fois le projet cloné, naviguez dans le dossier src, où se trouve l'application Streamlit, en exécutant :
+cd NLP/src
+Installer les bibliothèques nécessaires : Avant de pouvoir lancer l'application, vous devez installer les dépendances Python requises:
+streamlit
+pandas
+numpy
+tensorflow
+gensim
+
+streamlit run app.py
+
+
+
+
