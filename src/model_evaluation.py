@@ -18,18 +18,16 @@ import pickle
 
 
 
-# 1. Chargement du modèle et des données
 from tensorflow.keras.models import load_model
 model = load_model("trained_models/lstm_model.keras")
 df = pd.read_pickle("processed_data/news_with_embeddings.pkl")
 X = np.stack(df['w2v_embedding'].values)
 y = df['label'].values
 
-# 2. Prédictions
 y_pred = (model.predict(X) > 0.5).astype("int32")
-y_proba = model.predict(X)  # Probabilités pour ROC/AUC
+y_proba = model.predict(X)  
 
-# 3. Calcul des métriques de base
+# Calcul des métriques de base
 metrics = {
     "Accuracy": accuracy_score(y, y_pred),
     "Precision": precision_score(y, y_pred),
@@ -41,7 +39,7 @@ print("\nMétriques d'évaluation:")
 for name, value in metrics.items():
     print(f"{name}: {value:.4f}")
 
-# 4. Matrice de confusion
+# Matrice de confusion
 cm = confusion_matrix(y, y_pred)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm)
 disp.plot(cmap=plt.cm.Blues)
@@ -49,7 +47,7 @@ plt.title("Matrice de confusion")
 plt.savefig("evaluation/confusion_matrix.png")
 plt.close()
 
-# 5. Courbe ROC
+# Courbe ROC
 fpr, tpr, thresholds = roc_curve(y, y_proba)
 roc_auc = auc(fpr, tpr)
 
@@ -59,22 +57,21 @@ plt.title('Courbe ROC')
 plt.savefig("evaluation/roc_curve.png")
 plt.close()
 
-# 6. Analyse des erreurs
+# Analyse des erreurs
 df['prediction'] = y_pred
 errors = df[df['label'] != df['prediction']]
 
 print("\nExemple d'erreurs:")
 print(errors[['clean_text', 'label', 'prediction']].sample(5))
 
-# 1. Configuration de SHAP pour votre cas spécifique
+# SHAP 
 explainer_shap = shap.Explainer(
     model, 
-    X[:100],  # Référence (échantillon représentatif)
+    X[:100],  
     algorithm='permutation',
-    max_evals=2*X.shape[1]+2  # = 602 pour 300 features
+    max_evals=2*X.shape[1]+2  
 )
 
-# 1. Configuration SHAP
 try:
     explainer_shap = shap.Explainer(
         model,
@@ -87,7 +84,6 @@ try:
 except Exception as e:
     print(f"SHAP failed: {str(e)}")
 
-# 2. Configuration LIME corrigée
 def binary_predict_proba(x):
     """Wrapper pour adapter les prédictions au format LIME"""
     preds = model.predict(x).flatten()
@@ -102,7 +98,6 @@ explainer_lime = lime_tabular.LimeTabularExplainer(
     random_state=42
 )
 
-# Analyse d'un exemple mal classé
 error_sample = errors.iloc[0]
 exp = explainer_lime.explain_instance(
     error_sample['w2v_embedding'],
@@ -126,7 +121,6 @@ def plot_embeddings_2d(embeddings, labels, title="Embeddings 2D", method='TSNE',
         pca = PCA(n_components=2)
         reduced_embeddings = pca.fit_transform(embeddings)
     
-    # Création du graphique
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.scatterplot(x=reduced_embeddings[:, 0], y=reduced_embeddings[:, 1], hue=labels, palette='Set1', s=60, alpha=0.7, ax=ax)
     ax.set_title(f'{title} - {method}')
@@ -135,7 +129,6 @@ def plot_embeddings_2d(embeddings, labels, title="Embeddings 2D", method='TSNE',
     ax.legend(title='Classe', loc='upper right', labels=['True', 'Fake'])
     ax.grid(True)
 
-    # Sauvegarder le graphique si "save" est True
     if save:
         save_plot(fig, f"embeddings_2d_{method}.png")
 
