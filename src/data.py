@@ -21,13 +21,12 @@ import os
 
 
 def load_data(fake_path, true_path):
-    # Charger le dataset
     fake_news = pd.read_csv(fake_path)
     true_news = pd.read_csv(true_path)
     
-    # Ajouter les labels
-    fake_news['label'] = 0  # 0 pour les fausses news
-    true_news['label'] = 1  # 1 pour les vraies news
+   
+    fake_news['label'] = 0  
+    true_news['label'] = 1  
     
     combined_df = pd.concat([true_news, fake_news], axis=0)
     combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -75,17 +74,14 @@ def unified_text_processor(df, text_col='text'):
     stop_words = set(stopwords.words('english'))
     
     def clean_and_tokenize(text):
-        # Nettoyage de base
         text = str(text).lower()
         text = re.sub(r'https?://\S+|www\.\S+|@\w+|#\w+', '', text)
         text = text.translate(str.maketrans('', '', string.punctuation))
         text = re.sub(r'\d+', '', text)
         text = re.sub(r'\s+', ' ', text).strip()
         
-        # Tokenization 
         tokens = word_tokenize(text)
         
-        # Lemmatisation et filtrage
         clean_tokens = [
             lemmatizer.lemmatize(word) 
             for word in tokens 
@@ -104,7 +100,6 @@ def unified_text_processor(df, text_col='text'):
         lambda x: sum(1 for _, pos in nltk.pos_tag(x) if pos.startswith('NN'))
     )
     
-    # Sentiment analysis
     df['sentiment'] = df['clean_text'].swifter.apply(
         lambda x: TextBlob(x).sentiment.polarity
     )
@@ -119,17 +114,14 @@ def save_plot(fig, filename, folder="evaluation"):
     plt.close(fig)
 
 def plot_class_distribution(df):
-    # Distribution des classes
     class_distribution = df['label'].value_counts()
 
-    # Diagramme camembert (Pie chart)
     fig1, ax1 = plt.subplots()
     ax1.pie(class_distribution, labels=['True', 'Fake'], autopct='%1.1f%%', startangle=90)
-    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax1.axis('equal')  
     ax1.set_title("Répartition des Classes (Vrai vs Faux)")
     save_plot(fig1, "class_distribution_pie.png")
     
-    # Bar chart
     fig2, ax2 = plt.subplots()
     sns.barplot(x=class_distribution.index, y=class_distribution.values, ax=ax2)
     ax2.set_xticklabels(['True', 'Fake'])
@@ -137,23 +129,18 @@ def plot_class_distribution(df):
     ax2.set_ylabel("Nombre d'articles")
     save_plot(fig2, "class_distribution_bar.png")
 
-     # Extraire les mots les plus fréquents dans les fausses nouvelles
     fake_words = get_top_words(df[df['label'] == 0]['text'])
     
-    # Extraire les mots et leurs fréquences
     fake_labels, fake_counts = zip(*fake_words)
 
-    # Création du graphique des mots les plus fréquents dans les fausses nouvelles
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.barplot(x=list(fake_counts), y=list(fake_labels), ax=ax, palette='Reds_r')
     ax.set_title("Top 20 des mots (Fake News)")
     ax.set_xlabel("Fréquence")
     ax.set_ylabel("Mots")
     
-    # Affichage du graphique
-    plt.show()  # Affiche le graphique
+    plt.show()  
     
-    # Sauvegarde du graphique
     save_plot(fig, "top_words_fake.png")
 
     
@@ -179,7 +166,6 @@ def get_final_df():
 
     print(unified_text_processor(df, text_col='text', date_col='date', visualize=True))
 
-    # 4. Traitement NLP complet
     print("\nTraitement NLP avancé...")
     final_df = unified_text_processor(df)
     print(final_df[['clean_text', 'word_count', 'noun_count', 'sentiment']].head())
