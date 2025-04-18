@@ -37,6 +37,7 @@ numpy
 tensorflow
 gensim
 
+Lancer l'application Streamlit : Une fois les bibliothèques installées, vous pouvez lancer l'application Streamlit en exécutant la commande suivante dans le terminal :
 streamlit run app.py
 
 
