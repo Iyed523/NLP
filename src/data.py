@@ -164,7 +164,6 @@ def get_final_df():
 
     donnee_manquante(df)
 
-    print(unified_text_processor(df, text_col='text', date_col='date', visualize=True))
 
     print("\nTraitement NLP avancé...")
     final_df = unified_text_processor(df)
