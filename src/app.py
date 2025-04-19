@@ -16,23 +16,18 @@ def process_user_input(user_input):
         'label': [None]  
     })
     
-    # Appliquer le traitement NLP
     processed_df = unified_text_processor(temp_df)
     return processed_df
 
-# Charger les modèles
 @st.cache_resource
 def load_models():
-    # Charger le modèle LSTM
     lstm_model = load_model("trained_models/lstm_model.keras")
     
-    # Charger le modèle Word2Vec
     w2v_model = Word2Vec.load("models/w2v_fake_news.model")
     
     return lstm_model, w2v_model
 
-# Interface Streamlit
-st.title("🕵️‍♂️ Fake News Detector")
+st.title("Fake News Detector")
 st.write("Entrez un article de news pour vérifier son authenticité")
 
 user_input = st.text_area("Coller le texte de l'article ici:", height=200)
@@ -55,12 +50,12 @@ if st.button("Analyser"):
             proba = prediction[0][0]
             
             st.subheader("Résultat")
-            if proba < 0.5:  # Changement de > à <
+            if proba < 0.5:  
                 st.error(f"Fake News (confiance: {1-proba:.2%})")
             else:
                 st.success(f"News Authentique (confiance: {proba:.2%})")
             
-            # Jauge de confiance
+            
             st.progress(float(proba if proba > 0.5 else 1-proba))
             
             with st.expander("Détails de l'analyse"):
